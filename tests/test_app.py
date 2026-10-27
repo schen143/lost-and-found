@@ -123,6 +123,35 @@ def test_rejects_javascript_photo_url_and_future_date(client):
     assert "can&#39;t be in the future" in html
 
 
+def test_friendly_error_pages(client):
+    resp = client.get("/items/99999")
+    assert resp.status_code == 404 and "Maybe it was lost too" in text(resp)
+    resp = client.get("/users/nobody_here")
+    assert resp.status_code == 404
+    resp = client.get("/logout")
+    assert resp.status_code == 405 and "can't be opened that way" in text(resp)
+
+
+def test_bad_login_and_register_show_messages(client):
+    html = text(login(client, password="wrong"))
+    assert "Wrong username or password." in html
+    html = text(
+        client.post(
+            "/register",
+            data={
+                "username": "maya_r",
+                "display_name": "",
+                "password": "short",
+                "confirm": "different",
+                "csrf_token": csrf(client, "/register"),
+            },
+        )
+    )
+    for msg in ["That username is taken.", "Please enter your name.",
+                "at least 8 characters", "Passwords don&#39;t match."]:
+        assert msg in html
+
+
 def test_register_and_login(client):
     resp = client.post(
         "/register",

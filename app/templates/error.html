@@ -4,7 +4,7 @@
 {% block content %}
 <div class="panel narrow">
   <h1>{{ error.code }} — {{ error.name }}</h1>
-  <p>{% if error.code == 404 %}We couldn't find that page. Maybe it was lost too.{% elif error.code == 403 %}Only the person who posted this item can change it.{% else %}{{ error.description }}{% endif %}</p>
+  <p>{% if error.code == 404 %}We couldn't find that page. Maybe it was lost too.{% elif error.code == 403 %}Only the person who posted this item can change it.{% elif error.code == 405 %}That page can't be opened that way. Use the buttons and links on the site instead.{% elif error.code == 500 %}Something went wrong on our end. Nothing you typed was lost — try again in a moment.{% else %}{{ error.description }}{% endif %}</p>
   <a class="btn" href="{{ url_for('items.index') }}">Back to all items</a>
 </div>
 {% endblock %}

@@ -169,5 +169,13 @@ def user_page(username):
 @bp.app_errorhandler(403)
 @bp.app_errorhandler(404)
 @bp.app_errorhandler(400)
+@bp.app_errorhandler(405)
 def http_error(err):
     return render_template("error.html", error=err), err.code
+
+
+@bp.app_errorhandler(500)
+def server_error(err):
+    # Don't leave a half-finished transaction behind for the next request.
+    db.session.rollback()
+    return render_template("error.html", error=err), 500
