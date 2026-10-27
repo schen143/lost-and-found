@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import search_bar, item_card, pager with context %}
+{% block title %}{{ user.display_name }} · Campus Lost &amp; Found{% endblock %}
+
+{% block content %}
+<section class="profile">
+  <div class="avatar" aria-hidden="true">{{ user.display_name[:1] }}</div>
+  <div>
+    <h1>{{ user.display_name }}</h1>
+    <p class="meta">@{{ user.username }} · member since {{ user.created_at.strftime('%B %Y') }}</p>
+    <p>{{ stats.total }} item{{ '' if stats.total == 1 else 's' }} posted · {{ stats.returned }} returned to their owners</p>
+  </div>
+</section>
+
+{{ search_bar(url_for('items.user_page', username=user.username), q, unclaimed) }}
+
+{% if pagination.items %}
+  <div class="grid">
+    {% for item in pagination.items %}{{ item_card(item, show_owner=false) }}{% endfor %}
+  </div>
+  {{ pager(pagination, 'items.user_page', username=user.username) }}
+{% else %}
+  <div class="empty">
+    {% if current_user.is_authenticated and current_user.id == user.id and not (q or unclaimed) %}
+      <p>You haven't posted anything yet.</p>
+      <a class="btn btn-primary" href="{{ url_for('items.new') }}">Post a found item</a>
+    {% else %}
+      <p>No posts to show.</p>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

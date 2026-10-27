@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Post a found item · Campus Lost &amp; Found{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <h1>Post a found item</h1>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label>What did you find?
+      <input name="title" required maxlength="120" value="{{ data.title or '' }}" placeholder="e.g. Blue Hydro Flask">
+    </label>
+
+    <label>Where did you find it?
+      <input name="location" required maxlength="120" value="{{ data.location or '' }}" placeholder="e.g. Library, 2nd floor">
+    </label>
+
+    <label>When?
+      <input type="date" name="found_on" required max="{{ today }}" value="{{ data.found_on or today }}">
+    </label>
+
+    <label>Photo URL <span class="optional">(optional)</span>
+      <input type="url" name="photo_url" maxlength="500" value="{{ data.photo_url or '' }}" placeholder="https://…">
+    </label>
+
+    <label>Details <span class="optional">(optional)</span>
+      <textarea name="description" rows="4" maxlength="2000" placeholder="Color, brand, distinguishing marks, where you left it…">{{ data.description or '' }}</textarea>
+    </label>
+
+    <button class="btn btn-primary" type="submit">Post item</button>
+  </form>
+</div>
+{% endblock %}

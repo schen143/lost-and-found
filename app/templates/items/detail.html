@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} · Campus Lost &amp; Found{% endblock %}
+
+{% block content %}
+<p><a href="{{ url_for('items.index') }}">← All items</a></p>
+
+<article class="detail">
+  <div class="detail-photo thumb">
+    {% if item.photo_url %}
+      <img src="{{ item.photo_url }}" alt="Photo of {{ item.title }}" referrerpolicy="no-referrer" onerror="this.remove()">
+    {% endif %}
+    <span class="thumb-fallback" aria-hidden="true">{{ item.title[:1] }}</span>
+  </div>
+
+  <div class="detail-body">
+    <span class="badge {{ 'badge-returned' if item.is_returned else 'badge-open' }}">
+      {{ 'Returned to owner' if item.is_returned else 'Still unclaimed' }}
+    </span>
+    <h1>{{ item.title }}</h1>
+
+    <dl class="facts">
+      <dt>Where</dt><dd>{{ item.location }}</dd>
+      <dt>When</dt><dd>{{ item.found_on.strftime('%A, %B %d, %Y') }}</dd>
+      <dt>Posted by</dt>
+      <dd><a href="{{ url_for('items.user_page', username=item.owner.username) }}">{{ item.owner.display_name }}</a> (@{{ item.owner.username }})</dd>
+      {% if item.is_returned and item.returned_at %}
+        <dt>Returned</dt><dd>{{ item.returned_at.strftime('%B %d, %Y') }}</dd>
+      {% endif %}
+    </dl>
+
+    {% if item.description %}<p class="description">{{ item.description }}</p>{% endif %}
+
+    {% if current_user.is_authenticated and current_user.id == item.user_id %}
+      <div class="owner-actions">
+        <form action="{{ url_for('items.toggle_returned', item_id=item.id) }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% if item.is_returned %}
+            <button class="btn" type="submit">Undo: mark as unclaimed</button>
+          {% else %}
+            <button class="btn btn-primary" type="submit">✓ Mark as returned</button>
+          {% endif %}
+        </form>
+        <form action="{{ url_for('items.delete', item_id=item.id) }}" method="post"
+              onsubmit="return confirm('Delete this post for good?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-danger" type="submit">Delete post</button>
+        </form>
+      </div>
+    {% elif not item.is_returned %}
+      <p class="hint">Think this is yours? Reach out to {{ item.owner.display_name }} or check with Campus Safety, and be ready to describe it.</p>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

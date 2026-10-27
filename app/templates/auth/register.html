@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Create account · Campus Lost &amp; Found{% endblock %}
+
+{% block content %}
+<div class="panel narrow">
+  <h1>Create an account</h1>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Username
+      <input name="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_]+"
+             autocomplete="username" value="{{ form.username }}" autofocus>
+      <small>Letters, numbers and underscores. This is your public page URL.</small>
+    </label>
+    <label>Your name
+      <input name="display_name" required maxlength="80" autocomplete="name" value="{{ form.display_name }}">
+    </label>
+    <label>Password
+      <input type="password" name="password" required minlength="8" autocomplete="new-password">
+    </label>
+    <label>Confirm password
+      <input type="password" name="confirm" required minlength="8" autocomplete="new-password">
+    </label>
+    <button class="btn btn-primary" type="submit">Create account</button>
+  </form>
+  <p class="meta">Already have one? <a href="{{ url_for('auth.login') }}">Sign in</a>.</p>
+</div>
+{% endblock %}

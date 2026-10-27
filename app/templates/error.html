@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ error.code }} · Campus Lost &amp; Found{% endblock %}
+
+{% block content %}
+<div class="panel narrow">
+  <h1>{{ error.code }} — {{ error.name }}</h1>
+  <p>{% if error.code == 404 %}We couldn't find that page. Maybe it was lost too.{% elif error.code == 403 %}Only the person who posted this item can change it.{% else %}{{ error.description }}{% endif %}</p>
+  <a class="btn" href="{{ url_for('items.index') }}">Back to all items</a>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% macro search_bar(action, q, unclaimed) %}
+<form class="search" action="{{ action }}" method="get" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search items, descriptions, locations…" aria-label="Search">
+  <label class="toggle">
+    <input type="checkbox" name="unclaimed" value="1" {% if unclaimed %}checked{% endif %} onchange="this.form.submit()">
+    Still unclaimed only
+  </label>
+  <button class="btn" type="submit">Search</button>
+  {% if q or unclaimed %}<a class="clear" href="{{ action }}">Clear</a>{% endif %}
+</form>
+{% endmacro %}
+
+{% macro item_card(item, show_owner=true) %}
+<article class="card {% if item.is_returned %}card-returned{% endif %}">
+  <a class="card-link" href="{{ url_for('items.detail', item_id=item.id) }}">
+    <div class="thumb">
+      {% if item.photo_url %}
+        <img src="{{ item.photo_url }}" alt="" loading="lazy" referrerpolicy="no-referrer"
+             onerror="this.remove()">
+      {% endif %}
+      <span class="thumb-fallback" aria-hidden="true">{{ item.title[:1] }}</span>
+      <span class="badge {{ 'badge-returned' if item.is_returned else 'badge-open' }}">
+        {{ 'Returned' if item.is_returned else 'Unclaimed' }}
+      </span>
+    </div>
+    <div class="card-body">
+      <h3>{{ item.title }}</h3>
+      <p class="meta">📍 {{ item.location }}</p>
+      <p class="meta">🗓 Found {{ item.found_on.strftime('%b %d, %Y') }}</p>
+    </div>
+  </a>
+  {% if show_owner %}
+    <p class="card-owner">Posted by <a href="{{ url_for('items.user_page', username=item.owner.username) }}">{{ item.owner.display_name }}</a></p>
+  {% endif %}
+</article>
+{% endmacro %}
+
+{% macro pager(pagination, endpoint) %}
+{% if pagination.pages > 1 %}
+<nav class="pager" aria-label="Pages">
+  {% set args = dict(request.args) %}
+  {% if pagination.has_prev %}
+    {% set _ = args.update(page=pagination.prev_num) %}
+    <a class="btn" href="{{ url_for(endpoint, **dict(kwargs, **args)) }}">← Newer</a>
+  {% endif %}
+  <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+  {% if pagination.has_next %}
+    {% set _ = args.update(page=pagination.next_num) %}
+    <a class="btn" href="{{ url_for(endpoint, **dict(kwargs, **args)) }}">Older →</a>
+  {% endif %}
+</nav>
+{% endif %}
+{% endmacro %}
