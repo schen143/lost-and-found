@@ -27,4 +27,6 @@ Open http://127.0.0.1:5050. Stop the server with Ctrl+C. Your data stays in `ins
 
 ## Putting it online (optional)
 
-`render.yaml` deploys the app to [Render](https://render.com) with a free Postgres database: **New → Blueprint →** pick this repo. On other hosts, use the `Procfile` and set the `DATABASE_URL` and `SECRET_KEY` environment variables. Set `SHOW_DEMO_HINT=0` to hide the demo login hint.
+**Google Cloud Run:** `bash lost-and-found.sh --project <new-project-id> --billing <billing-account-id>`. The script creates the project, a Cloud SQL Postgres database (about $10/month) and the Cloud Run service, then prints the public URL. Add `--database-url <postgres-url>` to use a free Neon/Supabase database instead, or `--dry-run` to preview the commands. Run `bash lost-and-found.sh --help` for all options.
+
+**Render:** `render.yaml` deploys the app to [Render](https://render.com) with a free Postgres database: **New → Blueprint →** pick this repo. On other hosts, use the `Procfile` and set the `DATABASE_URL` and `SECRET_KEY` environment variables. Set `SHOW_DEMO_HINT=0` to hide the demo login hint.

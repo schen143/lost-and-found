@@ -1,0 +1,13 @@
+# Files NOT uploaded to Google Cloud Build when deploying.
+.gcloudignore
+.git/
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+instance/
+*.db
+.env
+.claude/
+tests/

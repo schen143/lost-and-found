@@ -4,6 +4,7 @@ import secrets
 from flask import Flask, abort, request, session
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -51,9 +52,15 @@ def create_app(config=None):
 
     register_cli(app)
     with app.app_context():
-        db.create_all()
-        if app.config["AUTO_SEED"]:
-            seed_if_empty()
+        try:
+            db.create_all()
+            if app.config["AUTO_SEED"]:
+                seed_if_empty()
+        except SQLAlchemyError:
+            # Several servers booting against a fresh database can race here;
+            # whichever loses just uses the tables/data the winner created.
+            db.session.rollback()
+            app.logger.warning("Skipped DB setup; another instance is doing it.", exc_info=True)
 
     return app
 
