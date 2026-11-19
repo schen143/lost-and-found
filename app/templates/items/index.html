@@ -5,13 +5,13 @@
 <section class="hero">
   <h1>Lost something on campus?</h1>
   <p>{{ stats.total }} items posted · <strong>{{ stats.unclaimed }}</strong> still waiting for their owners.</p>
-  {{ search_bar(url_for('items.index'), q, unclaimed) }}
+  {{ search_bar(url_for('items.index'), q, status) }}
 </section>
 
-{% if q or unclaimed %}
+{% if q or status %}
   <p class="result-count">
     {{ pagination.total }} result{{ '' if pagination.total == 1 else 's' }}
-    {% if q %}for “{{ q }}”{% endif %}{% if unclaimed %} that are still unclaimed{% endif %}
+    {% if q %}for “{{ q }}”{% endif %}{% if status == 'unclaimed' %} that are still unclaimed{% elif status == 'returned' %} that have been returned{% endif %}
   </p>
 {% endif %}
 

@@ -165,3 +165,22 @@ def test_register_and_login(client):
         follow_redirects=True,
     )
     assert "Welcome, New Student" in resp.get_data(as_text=True)
+
+
+def test_filter_results_button_and_status_filter(app, client):
+    html = client.get("/").get_data(as_text=True)
+    assert "Filter results" in html
+    assert 'name="status"' in html
+
+    returned_only = client.get("/", query_string={"status": "returned"}).get_data(as_text=True)
+    assert "badge-returned" in returned_only
+    assert "badge-open" not in returned_only
+
+    unclaimed_only = client.get("/", query_string={"status": "unclaimed"}).get_data(as_text=True)
+    assert "badge-open" in unclaimed_only
+    assert "badge-returned" not in unclaimed_only
+
+    with app.app_context():
+        title = Item.query.filter_by(is_returned=True).first().title
+    assert "1 result for" in text(client.get("/", query_string={"q": title, "status": "returned"}))
+    assert "0 results for" in text(client.get("/", query_string={"q": title, "status": "unclaimed"}))

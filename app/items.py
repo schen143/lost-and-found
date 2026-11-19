@@ -11,7 +11,10 @@ from .models import Item, User
 bp = Blueprint("items", __name__)
 
 
-def _filtered_query(base, q, unclaimed):
+STATUS_FILTERS = ("unclaimed", "returned")
+
+
+def _filtered_query(base, q, status):
     if q:
         like = f"%{q}%"
         base = base.filter(
@@ -21,22 +24,29 @@ def _filtered_query(base, q, unclaimed):
                 Item.location.ilike(like),
             )
         )
-    if unclaimed:
+    if status == "unclaimed":
         base = base.filter(Item.is_returned.is_(False))
+    elif status == "returned":
+        base = base.filter(Item.is_returned.is_(True))
     return base.order_by(Item.found_on.desc(), Item.created_at.desc())
 
 
 def _list_args():
     q = request.args.get("q", "").strip()[:100]
-    unclaimed = request.args.get("unclaimed") == "1"
+    status = request.args.get("status", "")
+    if status not in STATUS_FILTERS:
+        status = ""
+    # Older links used ?unclaimed=1 before the status filter existed.
+    if not status and request.args.get("unclaimed") == "1":
+        status = "unclaimed"
     page = request.args.get("page", 1, type=int)
-    return q, unclaimed, page
+    return q, status, page
 
 
 @bp.route("/")
 def index():
-    q, unclaimed, page = _list_args()
-    query = _filtered_query(Item.query, q, unclaimed)
+    q, status, page = _list_args()
+    query = _filtered_query(Item.query, q, status)
     pagination = query.paginate(
         page=page, per_page=current_app.config["ITEMS_PER_PAGE"], error_out=False
     )
@@ -45,7 +55,7 @@ def index():
         "unclaimed": Item.query.filter_by(is_returned=False).count(),
     }
     return render_template(
-        "items/index.html", pagination=pagination, q=q, unclaimed=unclaimed, stats=stats
+        "items/index.html", pagination=pagination, q=q, status=status, stats=stats
     )
 
 
@@ -152,8 +162,8 @@ def delete(item_id):
 @bp.route("/users/<username>")
 def user_page(username):
     user = User.query.filter(db.func.lower(User.username) == username.lower()).first_or_404()
-    q, unclaimed, page = _list_args()
-    query = _filtered_query(user.items, q, unclaimed)
+    q, status, page = _list_args()
+    query = _filtered_query(user.items, q, status)
     pagination = query.paginate(
         page=page, per_page=current_app.config["ITEMS_PER_PAGE"], error_out=False
     )
@@ -162,7 +172,7 @@ def user_page(username):
         "returned": user.items.filter_by(is_returned=True).count(),
     }
     return render_template(
-        "users/show.html", user=user, pagination=pagination, q=q, unclaimed=unclaimed, stats=stats
+        "users/show.html", user=user, pagination=pagination, q=q, status=status, stats=stats
     )
 
 
