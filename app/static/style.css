@@ -86,6 +86,10 @@ h1, h2, h3 { line-height: 1.2; }
   border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text);
 }
 .toggle { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.search select {
+  padding: 9px 10px; font: inherit;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text);
+}
 .clear { color: var(--muted); }
 .result-count { color: var(--muted); }
 

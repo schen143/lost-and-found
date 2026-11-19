@@ -1,12 +1,16 @@
-{% macro search_bar(action, q, unclaimed) %}
+{% macro search_bar(action, q, status) %}
 <form class="search" action="{{ action }}" method="get" role="search">
   <input type="search" name="q" value="{{ q }}" placeholder="Search items, descriptions, locations…" aria-label="Search">
   <label class="toggle">
-    <input type="checkbox" name="unclaimed" value="1" {% if unclaimed %}checked{% endif %} onchange="this.form.submit()">
-    Still unclaimed only
+    Show
+    <select name="status" aria-label="Filter by status">
+      <option value="" {% if not status %}selected{% endif %}>All items</option>
+      <option value="unclaimed" {% if status == 'unclaimed' %}selected{% endif %}>Still unclaimed</option>
+      <option value="returned" {% if status == 'returned' %}selected{% endif %}>Returned</option>
+    </select>
   </label>
-  <button class="btn" type="submit">Search</button>
-  {% if q or unclaimed %}<a class="clear" href="{{ action }}">Clear</a>{% endif %}
+  <button class="btn btn-primary" type="submit">Filter results</button>
+  {% if q or status %}<a class="clear" href="{{ action }}">Clear</a>{% endif %}
 </form>
 {% endmacro %}
 

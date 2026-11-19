@@ -12,7 +12,7 @@
   </div>
 </section>
 
-{{ search_bar(url_for('items.user_page', username=user.username), q, unclaimed) }}
+{{ search_bar(url_for('items.user_page', username=user.username), q, status) }}
 
 {% if pagination.items %}
   <div class="grid">
@@ -21,7 +21,7 @@
   {{ pager(pagination, 'items.user_page', username=user.username) }}
 {% else %}
   <div class="empty">
-    {% if current_user.is_authenticated and current_user.id == user.id and not (q or unclaimed) %}
+    {% if current_user.is_authenticated and current_user.id == user.id and not (q or status) %}
       <p>You haven't posted anything yet.</p>
       <a class="btn btn-primary" href="{{ url_for('items.new') }}">Post a found item</a>
     {% else %}
