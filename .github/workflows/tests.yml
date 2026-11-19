@@ -1,0 +1,55 @@
+name: Tests
+
+# Runs the tests on every pull request, and on every push to main
+# (a merged pull request counts as a push to main).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      # The tests use a throwaway SQLite file per test, so no database is needed here.
+      - name: Run tests
+        run: pytest
+
+  deploy:
+    # Waits for the tests and is skipped if they fail.
+    needs: test
+    # Only on a push to main, so pull requests run the tests and stop.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Sign in with the service account key
+        env:
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        run: |
+          printf '%s' "$GCP_CREDENTIALS" > "$RUNNER_TEMP/key.json"
+          gcloud auth activate-service-account --key-file="$RUNNER_TEMP/key.json"
+      # The service keeps DATABASE_URL and SECRET_KEY in its own settings
+      # (Secret Manager), so the deploy command needs no values here.
+      - name: Deploy to Cloud Run
+        run: >-
+          gcloud run deploy lost-and-found
+          --source .
+          --project my-lost-found1
+          --region us-west1
+          --allow-unauthenticated
+          --quiet
+      - name: Delete the key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/key.json"
